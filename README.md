@@ -76,3 +76,5 @@ GEMINI_MODEL = "gemini-2.5-flash-lite"
 - `requirements.txt` est a la racine pour que Streamlit Community Cloud installe les dependances.
 - `.streamlit/config.toml` est deja en place pour la configuration Streamlit.
 - `.streamlit/secrets.toml` ne doit pas etre versionne.
+
+# quiz4-analyseur-immobilier
