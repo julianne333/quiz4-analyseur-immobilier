@@ -20,12 +20,33 @@ def find_comparables(df: pd.DataFrame, subject: pd.Series) -> pd.DataFrame:
     min_sqft = float(subject["sqft_living"]) * 0.8
     max_sqft = float(subject["sqft_living"]) * 1.2
 
+    # Essai 1 : criteres stricts
     comparables = df[
         (df["id"] != subject["id"])
         & (df["zipcode"] == subject["zipcode"])
         & (df["bedrooms"] == subject["bedrooms"])
         & (df["sqft_living"].between(min_sqft, max_sqft))
     ].copy()
+
+    # Essai 2 : relaxer le nombre de chambres et la surface (30%)
+    if comparables.empty:
+        min_sqft_relaxed = float(subject["sqft_living"]) * 0.7
+        max_sqft_relaxed = float(subject["sqft_living"]) * 1.3
+        comparables = df[
+            (df["id"] != subject["id"])
+            & (df["zipcode"] == subject["zipcode"])
+            & (df["sqft_living"].between(min_sqft_relaxed, max_sqft_relaxed))
+        ].copy()
+
+    # Essai 3 : meme zipcode uniquement
+    if comparables.empty:
+        comparables = df[
+            (df["id"] != subject["id"])
+            & (df["zipcode"] == subject["zipcode"])
+        ].copy()
+
+    if comparables.empty:
+        return comparables
 
     comparables["sqft_gap"] = (comparables["sqft_living"] - float(subject["sqft_living"])).abs()
     comparables["price_gap"] = (comparables["price"] - float(subject["price"])).abs()
@@ -203,7 +224,8 @@ else:
 
 if comparables.empty:
     st.warning(
-        "Aucun comparable ne respecte simultanement les criteres: meme zipcode, meme nombre de chambres et superficie habitable a plus ou moins 20%."
+        "Aucun comparable n'a été trouvé, même en élargissant la recherche à toutes les propriétés "
+        "du même code postal. L'analyse est donc impossible."
     )
 else:
     comparable_table = comparables[
